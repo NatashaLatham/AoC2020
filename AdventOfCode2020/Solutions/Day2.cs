@@ -1,22 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
-namespace AdventOfCode2020
+namespace AdventOfCode2020.Solutions
 {
-    public static class Day2
+    internal class Day2 : Day
     {
-        public static void Solutions()
+        public Day2()
         {
-            SolutionPart1();
-            SolutionPart2();
+            DataFile = @".\Data\Day2.txt";
         }
 
         /// <summary>
         /// How many passwords are valid?
         /// </summary>
-        private static void SolutionPart1()
+        protected override void SolutionPart1()
         {
             var content = ReadFile();
 
@@ -38,7 +34,7 @@ namespace AdventOfCode2020
                 var password = parts[2];
 
                 // if the password is within the 
-                var numberOfCharactersInPassword = Array.FindAll(password.ToCharArray(), e => e == policyLetter).Length; 
+                var numberOfCharactersInPassword = Array.FindAll(password.ToCharArray(), e => e == policyLetter).Length;
 
                 if (numberOfCharactersInPassword >= policyMin && numberOfCharactersInPassword <= policyMax)
                 {
@@ -50,7 +46,7 @@ namespace AdventOfCode2020
             Console.WriteLine("Result: " + numberOfValidPasswords); // 465
         }
 
-        private static void SolutionPart2()
+        protected override void SolutionPart2()
         {
             var content = ReadFile();
 
@@ -77,19 +73,13 @@ namespace AdventOfCode2020
                 var letterAtPosition1 = password[policyPosition1];
                 var letterAtPosition2 = password[policyPosition2];
 
-                if (letterAtPosition1 == policyLetter ^ letterAtPosition2 == policyLetter )
+                if (letterAtPosition1 == policyLetter ^ letterAtPosition2 == policyLetter)
                 {
                     numberOfValidPasswords += 1;
                 }
             }
 
             Console.WriteLine("Result: " + numberOfValidPasswords);
-        }
-
-        private static string[] ReadFile()
-        {
-            var content = File.ReadAllLines(@".\Data\Day2.txt");
-            return content;
         }
     }
 }

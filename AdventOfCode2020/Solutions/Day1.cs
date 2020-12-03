@@ -1,21 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
-namespace AdventOfCode2020
+namespace AdventOfCode2020.Solutions
 {
-    public static class Day1
+    internal class Day1 : Day
     {
-        public static void Solutions()
+        public Day1()
         {
-            SolutionPart1();
-            SolutionPart2();
+            DataFile = @".\Data\Day1.txt";
         }
 
-        private static void SolutionPart1()
+        protected override void SolutionPart1()
         {
-            var content = ReadFile();
+            var content = ReadFileAsIntegers();
 
             var result = 0;
             foreach (var number in content)
@@ -35,9 +31,9 @@ namespace AdventOfCode2020
             Console.WriteLine("Result: " + result.ToString("N0"));
         }
 
-        private static void SolutionPart2()
+        protected override void SolutionPart2()
         {
-            var content = ReadFile();
+            var content = ReadFileAsIntegers();
 
             var result = 0;
             for (int i = 0; i < content.Length; i++)
@@ -57,20 +53,13 @@ namespace AdventOfCode2020
 
                 }
 
-                if(result != 0)
+                if (result != 0)
                 {
                     break;
                 }
             }
 
             Console.WriteLine("Result: " + result.ToString("N0"));
-        }
-
-        private static int[] ReadFile()
-        {
-            var content = File.ReadAllLines(@".\Data\Day1.txt");
-            var converted = Array.ConvertAll(content, Convert.ToInt32);
-            return converted;
         }
     }
 }

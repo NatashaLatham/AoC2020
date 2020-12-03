@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using AdventOfCode2020.Solutions;
 
 namespace AdventOfCode2020
 {
@@ -7,9 +6,10 @@ namespace AdventOfCode2020
     {
         static void Main(string[] args)
         {
-            //Day1.Solutions();
-            //Day2.Solutions();
-            Day3.Solutions();
+            new Day1().Solution();
+            new Day2().Solution();
+            new Day3().Solution();
+            Day.WriteEndLine();
         }      
     }
 }
