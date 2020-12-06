@@ -2,15 +2,17 @@
 
 namespace AdventOfCode2020
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            //new Day1().Solution();
-            //new Day2().Solution();
-            //new Day3().Solution();
-            new Day4().Solution();
-            new Day5().Solution();
+            //new Day01().Solution();
+            //new Day02().Solution();
+            //new Day03().Solution();
+            //new Day04().Solution();
+            //new Day05().Solution();
+            //new Day06().Solution();
+            new Day07().Solution();
 
             Day.WriteEndLine();
         }      

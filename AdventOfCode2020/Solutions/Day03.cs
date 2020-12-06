@@ -3,13 +3,13 @@ using System.Drawing;
 
 namespace AdventOfCode2020.Solutions
 {
-    internal class Day3 : Day
+    internal class Day03 : Day
     {
         private string[] content;
         private int mapWidth = 0;
         private int mapHeight = 0;
 
-        public Day3() : base("Day3.txt")
+        public Day03() : base("Day03.txt")
         {
         }
 

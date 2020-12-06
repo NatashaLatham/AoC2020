@@ -2,11 +2,11 @@
 
 namespace AdventOfCode2020.Solutions
 {
-    internal class Day2 : Day
+    internal class Day02 : Day
     {
         private string[] content;
 
-        public Day2() : base("Day2.txt")
+        public Day02() : base("Day02.txt")
         {
         }
 

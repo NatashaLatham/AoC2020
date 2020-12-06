@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AdventOfCode2020.Solutions
 {
-    internal class Day4 : Day
+    internal class Day04 : Day
     {
         private readonly string[] mandatoryPassportCodes = new[]
         {
@@ -26,7 +26,7 @@ namespace AdventOfCode2020.Solutions
 
         private string[] content;
 
-        public Day4() : base("Day4.txt")
+        public Day04() : base("Day04.txt")
         {
         }
 

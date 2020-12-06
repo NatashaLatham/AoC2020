@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace AdventOfCode2020.Solutions
 {
-    internal class Day5 : Day
+    internal class Day05 : Day
     {
         private const int numberOfRows = 127;
         private const int numberOfColumns = 7;
@@ -13,7 +13,7 @@ namespace AdventOfCode2020.Solutions
         private string[] boardingPasses;
         private ICollection<Seat> seats;
 
-        public Day5() : base("Day5.txt")
+        public Day05() : base("Day05.txt")
         {
         }
 
