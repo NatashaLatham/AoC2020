@@ -3,13 +3,36 @@ using System.IO;
 
 namespace AdventOfCode2020.Solutions
 {
+    /// <summary>
+    /// Base class for daily solutions
+    /// </summary>
     internal abstract class Day
     {
-        /// <summary>
-        /// The file that contains the input data
-        /// </summary>
-        protected string DataFile { get; set; }
+        private const string fileBasePath = @".\Data\";
 
+        // The file that contains the input data
+        private readonly string dataFile;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        protected Day()
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="dataFileName">The name of the datafile</param>
+        protected Day(string dataFileName)
+        {
+            dataFile = Path.Combine(fileBasePath, dataFileName);
+            Initialize();
+        }
+
+        /// <summary>
+        /// Write part 1 and part 2 of the solution for this day to the console
+        /// </summary>
         public void Solution()
         {
             WriteStartLine();
@@ -19,20 +42,28 @@ namespace AdventOfCode2020.Solutions
             SolutionPart2();
         }
 
-        protected abstract void SolutionPart1();
+        /// <summary>
+        /// Initiliazation
+        /// </summary>
+        abstract protected void Initialize();
 
-        protected abstract void SolutionPart2();
+        /// <summary>
+        /// Part 1 of the solution
+        /// </summary>
+        abstract protected void SolutionPart1();
 
-        protected int[] ReadFileAsIntegers()
-        {
-            var content = ReadFile();
-            var converted = Array.ConvertAll(content, Convert.ToInt32);
-            return converted;
-        }
+        /// <summary>
+        /// Part 2 of the solution
+        /// </summary>
+        abstract protected void SolutionPart2();
 
+        /// <summary>
+        /// Read all lines in the input file
+        /// </summary>
+        /// <returns></returns>
         protected string[] ReadFile()
         {
-            var content = File.ReadAllLines(DataFile);
+            var content = File.ReadAllLines(dataFile);
             return content;
         }
 
@@ -43,7 +74,7 @@ namespace AdventOfCode2020.Solutions
 
         private void WritePartLine(int part)
         {
-            Console.WriteLine($"-------------------- {part}");
+            Console.WriteLine($"-------------------- Solution - {part}");
         }
 
         public static void WriteEndLine()

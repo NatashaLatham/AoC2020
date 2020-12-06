@@ -4,15 +4,20 @@ namespace AdventOfCode2020.Solutions
 {
     internal class Day1 : Day
     {
-        public Day1()
+        private int[] content;
+
+        public Day1() : base("Day1.txt")
         {
-            DataFile = @".\Data\Day1.txt";
+        }
+
+        protected override void Initialize()
+        {
+            var contentAsStrings = ReadFile();
+            content = Array.ConvertAll(contentAsStrings, Convert.ToInt32);
         }
 
         protected override void SolutionPart1()
         {
-            var content = ReadFileAsIntegers();
-
             var result = 0;
             foreach (var number in content)
             {
@@ -33,8 +38,6 @@ namespace AdventOfCode2020.Solutions
 
         protected override void SolutionPart2()
         {
-            var content = ReadFileAsIntegers();
-
             var result = 0;
             for (int i = 0; i < content.Length; i++)
             {

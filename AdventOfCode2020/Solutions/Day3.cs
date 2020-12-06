@@ -9,13 +9,11 @@ namespace AdventOfCode2020.Solutions
         private int mapWidth = 0;
         private int mapHeight = 0;
 
-        public Day3()
+        public Day3() : base("Day3.txt")
         {
-            DataFile = @".\Data\Day3.txt";
-            Initialize();
         }
 
-        private void Initialize()
+        protected override void Initialize()
         {
             //content = GetTestMap();
             content = ReadFile();

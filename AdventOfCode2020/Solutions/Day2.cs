@@ -4,9 +4,15 @@ namespace AdventOfCode2020.Solutions
 {
     internal class Day2 : Day
     {
-        public Day2()
+        private string[] content;
+
+        public Day2() : base("Day2.txt")
         {
-            DataFile = @".\Data\Day2.txt";
+        }
+
+        protected override void Initialize()
+        {
+            content = ReadFile();
         }
 
         /// <summary>
@@ -14,8 +20,6 @@ namespace AdventOfCode2020.Solutions
         /// </summary>
         protected override void SolutionPart1()
         {
-            var content = ReadFile();
-
             var numberOfValidPasswords = 0;
             foreach (var line in content)
             {
@@ -48,8 +52,6 @@ namespace AdventOfCode2020.Solutions
 
         protected override void SolutionPart2()
         {
-            var content = ReadFile();
-
             var numberOfValidPasswords = 0;
             foreach (var line in content)
             {
