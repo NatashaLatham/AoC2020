@@ -12,7 +12,8 @@ namespace AdventOfCode2020
             //new Day04().Solution();
             //new Day05().Solution();
             //new Day06().Solution();
-            new Day07().Solution();
+            //new Day07().Solution();
+            new Day08().Solution();
 
             Day.WriteEndLine();
         }      
