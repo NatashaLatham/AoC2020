@@ -12,7 +12,7 @@ namespace AdventOfCode2020.Solutions
 
         protected override void Initialize()
         {
-            content = GetExamples();
+            content = GetExample();
             //content = ReadFile();
         }
 
@@ -28,7 +28,7 @@ namespace AdventOfCode2020.Solutions
             Console.WriteLine($"Result: {result}");
         }
 
-        private string[] GetExamples()
+        private string[] GetExample()
         {
             var line01 = "";
             var line02 = "";

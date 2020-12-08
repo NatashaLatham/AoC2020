@@ -7,9 +7,9 @@ namespace AdventOfCode2020.Solutions
 {
     internal class Day08 : Day
     {
-        private string[] content;
-
-        private List<Operation> operations = new List<Operation>();
+        private ICollection<int> visitedLines;
+        private IList<Operation> operations = new List<Operation>();
+        private int accumulator = 0;
 
         public Day08() : base("Day08.txt")
         {
@@ -17,105 +17,137 @@ namespace AdventOfCode2020.Solutions
 
         protected override void Initialize()
         {
-            content = GetExamples();
-            //content = ReadFile();
+            //var content = GetExample();
+            var content = ReadFile();
 
-            // process input into operation and arg
+            // process input into operation and argument
             foreach (var operation in content)
             {
                 var parts = operation.Split(' ');
                 var operationName = parts[0];
                 var argument = int.Parse(parts[1]);
 
-                // create object to remember if visited
                 operations.Add(new Operation(operationName, argument));
             }
         }
 
         protected override void SolutionPart1()
         {
-            var accumulator = 0;
+            accumulator = 0;
+            visitedLines = new List<int>();
 
-            // execute operations and mark as visited
-            for (int i = 0; i < operations.Count;)
-            {
-                if (operations[i].Visited)
-                {
-                    break;
-                }
+            RunCode();
 
-                operations[i].Visited = true;
-
-                switch (operations[i].Name)
-                {
-                    case "acc":
-                        accumulator += operations[i].Argument;
-                        i++;
-                        break;
-                    case "jmp": // execute the  
-                        i += operations[i].Argument;
-                        break;
-                    default: // nop -- next
-                        i++;
-                        break;
-                }
-            }
-
-            Console.WriteLine($"Result: {accumulator}");
+            Console.WriteLine($"The value of the accumulator is: {accumulator}");
         }
 
         protected override void SolutionPart2()
         {
-            // reset visited
-            operations.ForEach(o => o.Visited = false);
+            int lastReplacedJump = -1;
 
-            var accumulator = 0;
-            Operation prevOperation = null;
-            var prevOperationPosition = 0;
-
-            // execute operations and mark as visited
-            for (int i = 0; i < operations.Count;)
+            var finished = TryRunCode(lastReplacedJump, "jmp", "nop");
+            if (finished)
             {
-                if (operations[i].Visited)
+                Console.WriteLine("FINISHED!!!!!");
+            }
+            else
+            {
+                finished = TryRunCode(lastReplacedJump, "nop", "jmp");
+                if (finished)
                 {
-                    if(prevOperation != null && prevOperation.Name == "jmp")
-                    {
-                        operations[prevOperationPosition].Name = "nop";
-                        operations[prevOperationPosition].Visited = false;
-                        i = prevOperationPosition;
-                    }
-
-                    else if (prevOperation != null && prevOperation.Name == "nop")
-                    {
-                        operations[prevOperationPosition].Name = "jmp";
-                        operations[prevOperationPosition].Visited = false;
-                        i = prevOperationPosition;
-                    }
-                }
-
-                operations[i].Visited = true;
-                prevOperation = operations[i];
-                prevOperationPosition = i;
-
-                switch (operations[i].Name)
-                {
-                    case "acc":
-                        accumulator += operations[i].Argument;
-                        i++;
-                        break;
-                    case "jmp": // execute the  
-                        i += operations[i].Argument;
-                        break;
-                    default: // nop -- next
-                        i++;
-                        break;
+                    Console.WriteLine("FINISHED!!!!!");
                 }
             }
 
-            Console.WriteLine($"Result: {accumulator}");
+            Console.WriteLine($"The value of the accumulator is: {accumulator}");
         }
 
-        private string[] GetExamples()
+        private bool TryRunCode(int lastReplacedOperation, string changeFrom, string changeTo)
+        {
+            accumulator = 0;
+            visitedLines = new List<int>();
+
+            Console.WriteLine($"TryRunCode. LastReplaced {changeFrom} is [{lastReplacedOperation}]");
+
+            var finished = RunCode();
+
+            if (!finished)
+            {
+                // Restore previously replaced jump
+                if (lastReplacedOperation > -1)
+                {
+                    Console.WriteLine($"Changing {changeTo} back to {changeFrom} line [{lastReplacedOperation}]");
+                    operations[lastReplacedOperation].Name = changeFrom;
+                }
+
+                // Replace jump
+                var lineNumberOfNextJump = Array.IndexOf(operations.Select(x => x.Name).ToArray(), changeFrom, lastReplacedOperation + 1);
+
+                if (lineNumberOfNextJump == -1)
+                {
+                    // No more jmp statements to replace
+                    Console.WriteLine($"No more {changeFrom} statements to replace....");
+                    return finished;
+                }
+
+                Console.WriteLine($"Changing {changeFrom} to {changeTo} line [{lineNumberOfNextJump}]");
+                operations[lineNumberOfNextJump].Name = changeTo;
+                finished = TryRunCode(lineNumberOfNextJump, changeFrom, changeTo);
+            }
+
+            return finished;
+        }
+
+        private bool RunCode()
+        {
+            var lineNumber = 0;
+
+            while (lineNumber < operations.Count)
+            {
+                if (Visited(lineNumber))
+                {
+                    Console.WriteLine($" ---> Visited linenumber {lineNumber}. Returning false");
+                    return false;
+                }
+
+                visitedLines.Add(lineNumber);
+
+                lineNumber = ExecuteCommand(lineNumber, operations[lineNumber].Name, operations[lineNumber].Argument);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Executes the command an return the next line number
+        /// </summary>
+        private int ExecuteCommand(int lineNumber, string command, int argument)
+        {
+            var newLineNumber = lineNumber;
+
+            switch (command)
+            {
+                case "acc":
+                    accumulator += argument;
+                    newLineNumber++;
+                    break;
+                case "jmp":  
+                    newLineNumber += argument;
+                    break;
+                default: // nop -- next
+                    newLineNumber++;
+                    break;
+            }
+
+            return newLineNumber;
+        }
+
+        private bool Visited(int lineNumber)
+        {
+            return visitedLines.Contains(lineNumber);
+        }
+
+        private string[] GetExample()
         {
             var line01 = "nop +0";
             var line02 = "acc +1";
@@ -126,7 +158,6 @@ namespace AdventOfCode2020.Solutions
             var line07 = "acc +1";
             var line08 = "jmp -4";
             var line09 = "acc +6";
-
 
             var result = new[] { line01, line02, line03, line04, line05, line06, line07, line08, line09 };
 

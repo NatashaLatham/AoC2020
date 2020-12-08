@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AdventOfCode2020.Entities
+﻿namespace AdventOfCode2020.Entities
 {
-    public class Operation
+    internal class Operation
     {
         public string Name { get; set; }
 
-        public int Argument { get; set; }
-
-        public bool Visited { get; set; }
+        public int Argument { get; }
 
         public Operation(string name, int argument)
         {
