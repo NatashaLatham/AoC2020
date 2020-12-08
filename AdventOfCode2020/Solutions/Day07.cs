@@ -19,8 +19,8 @@ namespace AdventOfCode2020.Solutions
 
         protected override void Initialize()
         {
-            content = GetExample();
-            //content = ReadFile();
+            //content = GetExample();
+            content = ReadFile();
 
             bags = new List<BagRule>();
             foreach (var line in content)
@@ -139,7 +139,7 @@ namespace AdventOfCode2020.Solutions
             foreach (var bagInside in bag.BagsInside)
             {
                 var bagsInside = bags.Where(x => x.Bag == bagInside.BagColor);
-                numberOfBags += bagInside.NumberOfBags * CountNumberOfBags(bagsInside);
+                numberOfBags += bagInside.NumberOfBags + bagInside.NumberOfBags * CountNumberOfBags(bagsInside);
             }
 
             return numberOfBags;
