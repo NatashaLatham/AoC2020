@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Linq;
-using System.Collections;
 
 namespace AdventOfCode2020.Solutions
 {
     internal class Day09 : Day
     {
-        private string[] content;
-
         private long[] numbers;
+
+        private long blackSheep;
 
         public Day09() : base("Day09.txt")
         {
@@ -16,8 +15,8 @@ namespace AdventOfCode2020.Solutions
 
         protected override void Initialize()
         {
-            //content = GetExample();
-            content = ReadFile();
+            //var content = GetExample();
+            var content = ReadFile();
 
             numbers = Array.ConvertAll(content, e => long.Parse(e));
 
@@ -25,7 +24,7 @@ namespace AdventOfCode2020.Solutions
 
         protected override void SolutionPart1()
         {
-            long blackSheep = 0;
+            blackSheep = 0;
             var blackSheepIsFound = false;
             var amountOfPreambleNumbers = 25;
 
@@ -67,8 +66,51 @@ namespace AdventOfCode2020.Solutions
 
         protected override void SolutionPart2()
         {
-            var result = 0;
+            var endIndex = 0;
+
+            int startIndex;
+            for (startIndex = 0; startIndex < numbers.Length; startIndex++)
+            {
+                if (CalculateRange(startIndex, out endIndex))
+                {
+                    break;
+                }
+            }
+
+            if (endIndex <= 0)
+            {
+                Console.WriteLine("Unable to find range");
+                return;
+            }
+
+            var resultRange = numbers.Skip(startIndex).Take(endIndex - startIndex + 1);
+            var minimumNumberInRange = resultRange.Min();
+            var maximumNumberInRange = resultRange.Max();
+
+            var result = minimumNumberInRange + maximumNumberInRange;
             Console.WriteLine($"Result: {result}");
+        }
+
+        private bool CalculateRange(int startIndex, out int endIndex)
+        {
+            int index = startIndex;
+            long sum = 0;
+
+            endIndex = 0;
+            while (sum < blackSheep)
+            {
+                sum += numbers[index];
+
+                if (sum == blackSheep)
+                {
+                    endIndex = index;
+                    return true;
+                }
+
+                index++;
+            };
+
+            return false;
         }
 
         private string[] GetExample()
