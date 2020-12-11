@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AdventOfCode2020.Solutions
@@ -6,7 +7,7 @@ namespace AdventOfCode2020.Solutions
     internal class Day10 : Day
     {
         private int[] adapters;
-        private int[] diffs;
+        private List<int> deltas;
 
         public Day10() : base("Day10.txt")
         {
@@ -15,8 +16,8 @@ namespace AdventOfCode2020.Solutions
         protected override void Initialize()
         {
             //var content = GetExample();
-            var content = GetExample2();
-            //var content = ReadFile();
+            //var content = GetExample2();
+            var content = ReadFile();
 
             var jolts = Array.ConvertAll(content, e => int.Parse(e));
             var maxValue = jolts.Max();
@@ -31,71 +32,67 @@ namespace AdventOfCode2020.Solutions
 
         protected override void SolutionPart1()
         {
-            diffs = new[] { 0, 0, 0 };
+            deltas = new List<int>();
 
             // check the difference between the current and next joltage
-            // increase the respective variable
+            // add to deltas list (needed for part 2)
             for (int i = 0; i < adapters.Length - 1; i++)
             {
                 var diff = adapters[i + 1] - adapters[i];
-                diffs[diff - 1]++;
+                deltas.Add(diff);
             }
 
             // multiply oneDiff with threeDiff
-            var result = diffs[0] * diffs[2];
-            Console.WriteLine($"Result: {result}");
+            var oneDiff = deltas.Count(x => x == 1);
+            var threeDiff = deltas.Count(x => x == 3);
+            var result = oneDiff * threeDiff;
+            Console.WriteLine($"Result: {result} ({oneDiff} 1 jolt difference, {threeDiff} 3 jolts difference");
         }
 
         protected override void SolutionPart2()
         {
+            // There is always the entire combination of adapters
             long result = 1;
 
+            // continous ones
             var index = 0;
-
-            while (index < adapters.Length)
+            while (index < deltas.Count)
             {
-                // Get next adapter three jolts away
-                var nextAdapter = adapters.SingleOrDefault(x => x == adapters[index] + 3);
-                if (nextAdapter == 0)
+                var nextIndex = deltas.IndexOf(3, index);
+
+                if (nextIndex < 0)
                 {
-                    nextAdapter = adapters.SingleOrDefault(x => x == adapters[index] + 2);
+                    // No more adapters
+                    break;
                 }
 
-                if (nextAdapter == 0)
+                var sequenceLenght = nextIndex - index;
+
+                if (sequenceLenght > 0)
                 {
-                    index++;
-                    //Console.WriteLine($"No next adapter, moving to next index: {index}");
+                    var possibleCombinations = PossibleCombinations(sequenceLenght);
+                    result *= possibleCombinations;
                 }
-                else
-                {
-                    var nextIndex = Array.IndexOf(adapters, nextAdapter);
-                    //Console.WriteLine($"Next adapter: {nextAdapter} at index: {nextIndex}");
 
-                    // Get number of adapters in between
-                    var diff = nextIndex - index;
-
-                    switch(diff)
-                    {
-                        case 3:
-                           result *= 4;
-                            //Console.WriteLine($"Multiply by 4 --> {result}");
-                            break;
-                        case 2:
-                            result *= 2;
-                            //Console.WriteLine($"Multiply by 4 --> {result}");
-                            break;
-                        default:
-                            break;
-                    }
-
-                    index = nextIndex;
-                }
+                index = nextIndex;
+                index++;
             }
-
-            //result *= diffs[0];
 
             Console.WriteLine($"Result: {result}");
         }
+
+        // Couldn't find a formula, so hardcoded the possible combinations
+        private long PossibleCombinations(int seqLength)
+                => seqLength switch
+                {
+                    1 => 1,
+                    2 => 2,
+                    3 => 4,
+                    4 => 7,
+                    5 => 13,
+                    6 => 22,
+                    _ => 0
+                };
 
         private string[] GetExample()
         {
@@ -121,7 +118,7 @@ namespace AdventOfCode2020.Solutions
         private string[] GetExample2()
         {
             // difference is 22 - 1 jolt dif, 20 - 3 jolt dif, so 22 * 10 = 220
-            var line01 = 
+            var line01 =
 @"28
 33
 18
