@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AdventOfCode2020.Entities
 {
@@ -11,8 +12,6 @@ namespace AdventOfCode2020.Entities
         public int Row { get; }
 
         public int Column { get; }
-
-        public bool IsFloor { get; }
 
         public bool IsTaken { get; private set; }
 
@@ -28,9 +27,6 @@ namespace AdventOfCode2020.Entities
             Column = column;
             switch (status)
             {
-                case '.':
-                    IsFloor = true;
-                    break;
                 case '#':
                     IsTaken = true;
                     break;
@@ -41,6 +37,48 @@ namespace AdventOfCode2020.Entities
             }
         }
 
+        public void ApplyRules_Part1()
+        {
+            if (!IsTaken)
+            {
+                // If a seat is empty(L) and there are no occupied seats adjacent to it,
+                // the seat becomes occupied.
+                if (AdjacentSeats.All(x => !x.IsTaken))
+                {
+                    ChangeStatus = true;
+                }
+                return;
+            }
+
+            // If a seat is occupied (#) and four or more seats adjacent to it are also occupied,
+            // the seat becomes empty.
+            if (AdjacentSeats.Count(x => x.IsTaken) >= 4)
+            {
+                ChangeStatus = true;
+            }
+        }
+
+        public void ApplyRules_Part2()
+        {
+            if (!IsTaken)
+            {
+                // If a seat is empty(L) and there are no occupied seats visible from it,
+                // the seat becomes occupied.
+                if (VisibleSeats.All(x => !x.IsTaken))
+                {
+                    ChangeStatus = true;
+                }
+                return;
+            }
+
+            // If a seat is occupied (#) and five or more visible seats from it are also occupied,
+            // the seat becomes empty.
+            if (VisibleSeats.Count(x => x.IsTaken) >= 5)
+            {
+                ChangeStatus = true;
+            }
+        }
+
         public void Update()
         {
             IsTaken = !IsTaken;
@@ -48,7 +86,7 @@ namespace AdventOfCode2020.Entities
 
         public void Print()
         {
-            var character = IsFloor ? "." : IsTaken ? "#" : "L";
+            var character = IsTaken ? "#" : "L";
             Console.Write(character);
         }
     }

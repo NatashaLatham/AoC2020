@@ -24,58 +24,34 @@ namespace AdventOfCode2020.Solutions
                 var line = content[i];
                 for (var j = 0; j < line.Length; j++)
                 {
-                    seats.Add(new BoatSeat(i, j, line[j]));
+                    // Don't add the floors
+                    if (line[j] != '.')
+                    {
+                        seats.Add(new BoatSeat(i, j, line[j]));
+                    }
                 }
             }
 
             foreach (var seat in seats)
             {
                 seat.AdjacentSeats = GetAdjacentSeats(seat);
+                seat.VisibleSeats = GetVisibleSeats(seat);
             }
         }
 
         protected override void SolutionPart1()
         {
-            var isUpdated = true;
-            var round = 1;
-            while (isUpdated)
-            {
-                // Reset ChangeStatus
-                seats.ForEach(x => x.ChangeStatus = false);
-
-                Console.WriteLine($"Round: {round}");
-
-                isUpdated = false;
-                foreach (var seat in seats)
-                {
-                    if (ExecuteRule1(seat))
-                    {
-                        isUpdated = true;
-                    }
-
-                    if (ExecuteRule2(seat))
-                    {
-                        isUpdated = true;
-                    }
-                }
-
-                // Now actually update the seats
-                foreach (var seat in seats.Where(x => x.ChangeStatus))
-                {
-                    seat.Update();
-                }
-
-                //PrintMap();
-
-                round++;
-            }
-
-            var numberOfSeatsTaken = seats.Count(x => x.IsTaken);
-            Console.WriteLine($"Number of occupied seats: {numberOfSeatsTaken}");
+            Solution(1);
         }
 
         protected override void SolutionPart2()
         {
+            Initialize();
+            Solution(2);
+        }
+
+        private void Solution(int part)
+        {
             var isUpdated = true;
             var round = 1;
             while (isUpdated)
@@ -88,20 +64,21 @@ namespace AdventOfCode2020.Solutions
                 isUpdated = false;
                 foreach (var seat in seats)
                 {
-                    if (ExecuteRule1(seat))
+                    if (part == 1)
                     {
-                        isUpdated = true;
+                        seat.ApplyRules_Part1();
                     }
-
-                    if (ExecuteRule2(seat))
+                    else
                     {
-                        isUpdated = true;
+                        seat.ApplyRules_Part2();
                     }
                 }
 
                 // Now actually update the seats
+                // (This has to be done after the checks otherwise updating a seat will influence the checks)
                 foreach (var seat in seats.Where(x => x.ChangeStatus))
                 {
+                    isUpdated = true;
                     seat.Update();
                 }
 
@@ -112,58 +89,6 @@ namespace AdventOfCode2020.Solutions
 
             var numberOfSeatsTaken = seats.Count(x => x.IsTaken);
             Console.WriteLine($"Number of occupied seats: {numberOfSeatsTaken}");
-        }
-
-        /// <summary>
-        /// If a seat is empty (L) and there are no occupied seats adjacent to it,
-        /// the seat becomes occupied.
-        /// </summary>
-        private bool ExecuteRule1(BoatSeat seat)
-        {
-            if (seat.IsFloor)
-            {
-                //Console.WriteLine("Floor --> No update");
-                return false;
-            }
-
-            if (!seat.IsTaken)
-            {
-                // Check adjacent seats
-                //Console.WriteLine($"Empty --> Number of adjacent seats {adjacentSeats.Count()}");
-                //Console.WriteLine($" Taken: {adjacentSeats.Count(x => x.IsTaken)} Floors: {adjacentSeats.Count(x => x.IsFloor)} Empty: {adjacentSeats.Count(x => !x.IsTaken)}");
-                if (seat.AdjacentSeats.All(x => !x.IsTaken || x.IsFloor))
-                {
-                    //Console.WriteLine("Empty --> Taken");
-                    seat.ChangeStatus = true;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// If a seat is occupied (#) and four or more seats adjacent to it are also occupied,
-        /// the seat becomes empty
-        /// </summary>
-        private bool ExecuteRule2(BoatSeat seat)
-        {
-            if (seat.IsFloor)
-            {
-                return false;
-            }
-
-            if (seat.IsTaken)
-            {
-                // Check adjacent seats
-                if (seat.AdjacentSeats.Count(x => x.IsTaken) >= 4)
-                {
-                    seat.ChangeStatus = true;
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -171,7 +96,8 @@ namespace AdventOfCode2020.Solutions
         /// </summary>
         private IEnumerable<BoatSeat> GetAdjacentSeats(BoatSeat seat)
         {
-            var result = seats.Where(x => x.Row == seat.Row - 1 && x.Column == seat.Column - 1
+            var result = seats.Where(x =>
+               x.Row == seat.Row - 1 && x.Column == seat.Column - 1
             || x.Row == seat.Row - 1 && x.Column == seat.Column
             || x.Row == seat.Row - 1 && x.Column == seat.Column + 1
             || x.Row == seat.Row && x.Column == seat.Column - 1
@@ -190,27 +116,23 @@ namespace AdventOfCode2020.Solutions
         {
             var result = new List<BoatSeat>();
 
-            // left
-            for (var i = seat.Column; i <= 0; i--)
-            {
-                var visibleSeat = seats.FirstOrDefault(x => x.Row == seat.Row && x.Column == seat.Column + i);
-                if (visibleSeat != null)
-                {
-                    result.Add(visibleSeat);
-                    break;
-                }
-            }
+            var leftDiagonalUp = seats.Where(x => x.Row < seat.Row && x.Column == seat.Column + (seat.Row - x.Row)).OrderByDescending(x => x.Row).FirstOrDefault();
+            var up = seats.Where(x => x.Row < seat.Row && x.Column == seat.Column).OrderByDescending(x => x.Row).FirstOrDefault();
+            var rightDiagonalUp = seats.Where(x => x.Row < seat.Row && x.Column == seat.Column - (seat.Row - x.Row)).OrderByDescending(x => x.Row).FirstOrDefault();
+            var left = seats.Where(x => x.Row == seat.Row && x.Column < seat.Column).OrderByDescending(x => x.Column).FirstOrDefault();
+            var right = seats.Where(x => x.Row == seat.Row && x.Column > seat.Column).OrderBy(x => x.Column).FirstOrDefault();
+            var leftDiagonalDown = seats.Where(x => x.Row > seat.Row && x.Column == seat.Column + (seat.Row - x.Row)).OrderBy(x => x.Row).FirstOrDefault();
+            var down = seats.Where(x => x.Row > seat.Row && x.Column == seat.Column).OrderBy(x => x.Row).FirstOrDefault();
+            var rightDiagonalDown = seats.Where(x => x.Row > seat.Row && x.Column == seat.Column - (seat.Row - x.Row)).OrderBy(x => x.Row).FirstOrDefault();
 
-            // right
-            for (var i = seat.Column; i <= 0; i++)
-            {
-                var visibleSeat = seats.FirstOrDefault(x => x.Row == seat.Row && x.Column == seat.Column + i);
-                if (visibleSeat != null)
-                {
-                    result.Add(visibleSeat);
-                    break;
-                }
-            }
+            if (leftDiagonalUp != null) { result.Add(leftDiagonalUp); }
+            if (up != null) { result.Add(up); }
+            if (rightDiagonalUp != null) { result.Add(rightDiagonalUp); }
+            if (left != null) { result.Add(left); }
+            if (right != null) { result.Add(right); }
+            if (leftDiagonalDown != null) { result.Add(leftDiagonalDown); }
+            if (down != null) { result.Add(down); }
+            if (rightDiagonalDown != null) { result.Add(rightDiagonalDown); }
 
             return result;
         }
