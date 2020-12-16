@@ -10,14 +10,14 @@
         /// <summary>
         /// The Id of the bus that specifies the timeinterval a bus leaves
         /// </summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// The first departure time after the specified timespan (calculated)
         /// </summary>
-        public int DepartureTime { get; set; }
+        public long DepartureTime { get; set; }
 
-        public Bus(int number, int id)
+        public Bus(int number, long id)
         {
             Number = number;
             Id = id;

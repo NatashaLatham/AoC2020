@@ -16,8 +16,8 @@ namespace AdventOfCode2020.Solutions
 
         protected override void Initialize()
         {
-            var content = GetExample();
-            //var content = ReadFile();
+            //var content = GetExample();
+            var content = ReadFile();
 
             earliestTimeStamp = int.Parse(content[0]);
 
@@ -27,7 +27,7 @@ namespace AdventOfCode2020.Solutions
             {
                 if (busIds[i] != "x")
                 {
-                    busses.Add(new Bus(i, int.Parse(busIds[i])));
+                    busses.Add(new Bus(i, long.Parse(busIds[i])));
                 }
             }
         }
@@ -59,9 +59,19 @@ namespace AdventOfCode2020.Solutions
 
         protected override void SolutionPart2()
         {
-            var result = 0;
+            var departureTime = 0L;
+            var step = busses.First().Id;
+            foreach (var bus in busses.Skip(1))
+            {
+                // Find the departure time (t) where this bus leaves 'Number' after the first bus
+                while ((departureTime + bus.Number) % bus.Id != 0L)
+                {
+                    departureTime += step;
+                }
+                step *= bus.Id;
+            }
 
-            Console.WriteLine($"Result: {result}");
+            Console.WriteLine($"Departure time: {departureTime}");
         }
 
         private string[] GetExample()
