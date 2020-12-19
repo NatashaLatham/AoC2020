@@ -16,6 +16,7 @@ namespace AdventOfCode2020.Solutions
         protected override void Initialize()
         {
             //var content = GetExample();
+            //var content = GetExampleForPart2();
             var content = ReadFile();
 
             var mask = new string('X', 36);
@@ -55,7 +56,7 @@ namespace AdventOfCode2020.Solutions
 
                 // Apply mask and update Value accordingly
                 dockingData.ApplyMask();
-                memoryAddresses[dockingData.MemoryAddress] = dockingData.Value;
+                memoryAddresses[dockingData.MemoryAddress] = dockingData.ValueAfterMask;
             }
 
             var sumOfAllValuesLeftInMemory = memoryAddresses.Values.Sum(x => x);
@@ -64,8 +65,23 @@ namespace AdventOfCode2020.Solutions
 
         protected override void SolutionPart2()
         {
-            var result = 0;
-            Console.WriteLine($"Result: {result}");
+            // Initialize memory addresses
+            var memoryAddresses = new Dictionary<long, long>();
+
+            foreach (var dockingData in dockingData)
+            {
+                // Apply mask
+                dockingData.ApplyMaskVersion2();
+
+                // Write memory addresses
+                foreach (var memoryAddress in dockingData.FloatingMemoryAdresses)
+                {
+                    memoryAddresses[memoryAddress] = dockingData.Value;
+                }
+            }
+
+            var sumOfAllValuesLeftInMemory = memoryAddresses.Values.Sum(x => x);
+            Console.WriteLine($"Sum of all values left in memory: {sumOfAllValuesLeftInMemory}");
         }
 
         private long GetMemoryAddress(string command)
@@ -82,6 +98,18 @@ namespace AdventOfCode2020.Solutions
             var line02 = "mem[8] = 11";
             var line03 = "mem[7] = 101";
             var line04 = "mem[8] = 0";
+
+            var result = new[] { line01, line02, line03, line04 };
+
+            return result;
+        }
+
+        private string[] GetExampleForPart2()
+        {
+            var line01 = "mask = 000000000000000000000000000000X1001X";
+            var line02 = "mem[42] = 100";
+            var line03 = "mask = 00000000000000000000000000000000X0XX";
+            var line04 = "mem[26] = 1";
 
             var result = new[] { line01, line02, line03, line04 };
 
