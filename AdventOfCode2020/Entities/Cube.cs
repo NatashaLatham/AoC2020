@@ -18,11 +18,17 @@ namespace AdventOfCode2020.Entities
 
         public int Z { get; }
 
+        public int W { get; }
+
         public CubeState State { get; private set; }
 
         public bool ChangeState { get; set; }
 
         public IList<Cube> Neighbours { get; set; }
+
+        public bool HasAllNeighbours => Neighbours.Count == 80;
+
+        public bool Seen { get; set; }
 
         public Cube(int x, int y, int z, char state)
         {
@@ -40,9 +46,15 @@ namespace AdventOfCode2020.Entities
             Neighbours = new List<Cube>();
         }
 
+        public Cube(int x, int y, int z, int w, char state) : this(x, y, z, state)
+        {
+            W = w;
+        }
+
         public void ApplyCycle()
         {
             var activeNeighbours = Neighbours.Count(x => x.State == CubeState.Active);
+
             switch (State)
             {
                 case CubeState.Active:
