@@ -24,11 +24,12 @@ namespace AdventOfCode2020.Solutions
             foreach (var line in content)
             {
                 var calculationLine = line;
+
                 // Replace parentheses with calculation result
                 var parenthesesFound = calculationLine.IndexOf("(") >= 0;
                 while (parenthesesFound)
                 {
-                    calculationLine = ReplaceParentheses(calculationLine);
+                    calculationLine = ReplaceParentheses(calculationLine, 1);
                     parenthesesFound = calculationLine.IndexOf("(") >= 0;
                 }
 
@@ -39,16 +40,37 @@ namespace AdventOfCode2020.Solutions
                 //Console.WriteLine($"Result is: {result}");
             }
 
-            Console.WriteLine($"Result: {sumOfResultingValues}");
+            Console.WriteLine($"Sum of result values: {sumOfResultingValues}");
         }
 
         protected override void SolutionPart2()
         {
-            var result = 0;
-            Console.WriteLine($"Result: {result}");
+            // 297139936815324 --> too low
+            var sumOfResultingValues = 0L;
+
+            foreach (var line in content)
+            {
+                var calculationLine = line;
+
+                // Replace parentheses with calculation result
+                var parenthesesFound = calculationLine.IndexOf("(") >= 0;
+                while (parenthesesFound)
+                {
+                    calculationLine = ReplaceParentheses(calculationLine, 2);
+                    parenthesesFound = calculationLine.IndexOf("(") >= 0;
+                }
+
+                // Calculate the remainder
+                var result = CalculatePart2(calculationLine);
+                sumOfResultingValues += result;
+
+                Console.WriteLine($"Result is: {result}");
+            }
+
+            Console.WriteLine($"Sum of result values: {sumOfResultingValues}");
         }
 
-        private string ReplaceParentheses(string input)
+        private string ReplaceParentheses(string input, int part)
         {
             var elements = input.Split('(', ')');
 
@@ -61,17 +83,51 @@ namespace AdventOfCode2020.Solutions
             var result = input;
             foreach (var element in elements.Where(x => x.Trim().Length > 4 && !x.StartsWith(' ') && !x.EndsWith(' ')))
             {
-                var calculationResult = Calculate(element);
+                long calculationResult;
+                if (part == 1)
+                {
+                    calculationResult = Calculate(element);
+                }
+                else
+                {
+                    calculationResult = CalculatePart2(element);
+                }
                 result = result.Replace($"({element})", calculationResult.ToString());
             }
 
-            result = ReplaceParentheses(result);
+            result = ReplaceParentheses(result, part);
+            return result;
+        }
+
+        private long CalculatePart2(string input)
+        {
+            // Replace additions with their result 
+            var elements = input.Split('*');
+
+            // The ones bigger than 4 contain the additions
+            var calculationLine = input;
+            foreach (var element in elements.Where(x => x.Trim().Length > 4))
+            {
+                var trimmedElement = element.Trim();
+                var calculationResult = Calculate(trimmedElement);
+                calculationLine = calculationLine.Replace($"{trimmedElement}", calculationResult.ToString());
+            }
+
+            // Calculate the remainder (only multiplications should be left)
+            var result = Calculate(calculationLine);
+
             return result;
         }
 
         private long Calculate(string line)
         {
             var elements = line.Split(" ");
+
+            if (elements.Length == 1)
+            {
+                return long.Parse(line);
+            }
+
             long result = 0;
             var leftElement = long.Parse(elements[0]);
             for (var i = 1; i < elements.Length; i += 2)
@@ -82,7 +138,6 @@ namespace AdventOfCode2020.Solutions
                 {
                     "+" => Add(leftElement, rightElement),
                     "*" => Multiply(leftElement, rightElement),
-                    "-" => Subtract(leftElement, rightElement),
                     _ => throw new ArgumentOutOfRangeException(nameof(operation)),
                 };
                 leftElement = result;
@@ -96,11 +151,6 @@ namespace AdventOfCode2020.Solutions
             return a + b;
         }
 
-        private long Subtract(long a, long b)
-        {
-            return a - b;
-        }
-
         private long Multiply(long a, long b)
         {
             return a * b;
@@ -108,14 +158,18 @@ namespace AdventOfCode2020.Solutions
 
         private string[] GetExample()
         {
-            var line01 = "1 + 2 * 3 + 4 * 5 + 6";        // 71
-            var line02 = "1 + (2 * 3) + (4 * (5 + 6))";  // 51
-            var line03 = "2 * 3 + (4 * 5)";              // 26
-            var line04 = "5 + (8 * 3 + 9 + 3 * 4 * 3)";  // 437
-            var line05 = "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))"; // 12240
-            var line06 = "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2";  // 13631
+            var line01 = "1 + 2 * 3 + 4 * 5 + 6";        // 71 - 231
+            var line02 = "1 + (2 * 3) + (4 * (5 + 6))";  // 51 - 51
+            var line03 = "2 * 3 + (4 * 5)";              // 26 - 46
+            var line04 = "5 + (8 * 3 + 9 + 3 * 4 * 3)";  // 437 - 1445
+            var line05 = "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))"; // 12240 - 669060
+            var line06 = "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2";  // 13631 - 23340
+            var line07 = "8 * 3 + (6 + 5 + 2 * 6 * 6) * 2"; // 984 - 7536
+            var line08 = "4 + (5 + (5 * 5 + 3 + 2) + (6 + 4 * 9 * 2 * 8) * 6 + (7 * 5 * 2) * (2 * 8 * 2)) + (8 * 7 + 7) * 6 * 9 * (5 + 9)"; // 215843292 - 2748782736
+            var line09 = "3 + 5"; // 8 - 8
+            var line10 = "4 * 5"; // 20 - 20
 
-            var result = new[] { line01, line02, line03, line04, line05, line06 };
+            var result = new[] { line01, line02, line03, line04, line05, line06, line07, line08, line09, line10 };
 
             return result;
         }
