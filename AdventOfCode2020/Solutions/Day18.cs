@@ -45,7 +45,6 @@ namespace AdventOfCode2020.Solutions
 
         protected override void SolutionPart2()
         {
-            // 297139936815324 --> too low
             var sumOfResultingValues = 0L;
 
             foreach (var line in content)
@@ -92,7 +91,7 @@ namespace AdventOfCode2020.Solutions
                 {
                     calculationResult = CalculatePart2(element);
                 }
-                result = result.Replace($"({element})", calculationResult.ToString());
+                result = result.ReplaceFirst($"({element})", calculationResult.ToString());
             }
 
             result = ReplaceParentheses(result, part);
@@ -110,7 +109,7 @@ namespace AdventOfCode2020.Solutions
             {
                 var trimmedElement = element.Trim();
                 var calculationResult = Calculate(trimmedElement);
-                calculationLine = calculationLine.Replace($"{trimmedElement}", calculationResult.ToString());
+                calculationLine = calculationLine.ReplaceFirst($"{trimmedElement}", calculationResult.ToString());
             }
 
             // Calculate the remainder (only multiplications should be left)
@@ -167,11 +166,29 @@ namespace AdventOfCode2020.Solutions
             var line07 = "8 * 3 + (6 + 5 + 2 * 6 * 6) * 2"; // 984 - 7536
             var line08 = "4 + (5 + (5 * 5 + 3 + 2) + (6 + 4 * 9 * 2 * 8) * 6 + (7 * 5 * 2) * (2 * 8 * 2)) + (8 * 7 + 7) * 6 * 9 * (5 + 9)"; // 215843292 - 2748782736
             var line09 = "3 + 5"; // 8 - 8
-            var line10 = "4 * 5"; // 20 - 20
+            var line10 = "2 * 2 * ((7 * 2 + 2 * 5 + 2 + 2) + 9 + 7) * 2 * (4 * 4 * (6 + 3) + 8 * 6 + 3) + (7 * 5 + 4 + 3)"; // 732042 - 5428608
 
             var result = new[] { line01, line02, line03, line04, line05, line06, line07, line08, line09, line10 };
 
             return result;
+        }
+    }
+
+    /// <summary>
+    /// Extension method to only replace the first occurance of a string in a string
+    /// </summary>
+    internal static class StringExtensionMethods
+    {
+        public static string ReplaceFirst(this string text, string search, string replace)
+        {
+            int pos = text.IndexOf(search);
+
+            if (pos < 0)
+            {
+                return text;
+            }
+
+            return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
         }
     }
 }
