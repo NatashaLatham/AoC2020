@@ -18,6 +18,7 @@ namespace AdventOfCode2020.Solutions
         protected override void Initialize()
         {
             //var content = GetExample();
+            //var content = GetExample2();
             var content = ReadFile();
 
             Rules = new List<Rule>();
@@ -43,7 +44,6 @@ namespace AdventOfCode2020.Solutions
                         var newRule = new Rule(int.Parse(rule[0]));
                         newRule.Matches.Add(ruleWithoutQuotes);
                         Rules.Add(newRule);
-                        Console.WriteLine($"Added rule for {newRule.Number}: {ruleWithoutQuotes}");
                     }
                     else
                     {
@@ -62,10 +62,8 @@ namespace AdventOfCode2020.Solutions
             foreach (var tempRule in TempRules)
             {
                 // The rule already exists --> skip
-                Console.WriteLine($"Trying to find match for Rule {tempRule.Key}: {tempRule.Value}");
                 if (Rules.Any(x => x.Number == tempRule.Key))
                 {
-                    Console.WriteLine($" Rule already there --> Continue");
                     continue;
                 }
 
@@ -82,25 +80,111 @@ namespace AdventOfCode2020.Solutions
 
             foreach (var message in Messages)
             {
-                if (Rules.Any(Rule => Rule.Matches.Any(match => match == message)))
+                if (Rules.Any(rule => rule.Number == 0 && rule.Matches.Any(match => match == message)))
                 {
                     result++;
                 }
             }
 
-            Console.WriteLine($"Number of messages that match rule: {result}");
+            Console.WriteLine($"Number of messages that match rule 0: {result}");
         }
 
         protected override void SolutionPart2()
         {
             var result = 0;
-            Console.WriteLine($"Result: {result}");
+
+            var rule42Matches = Rules.Single(x => x.Number == 42).Matches;
+            var rule31Matches = Rules.Single(x => x.Number == 31).Matches;
+
+            // The rules for rule 31 and rule 42 must have the same length
+            var matchLength42 = rule42Matches.Max(x => x.Length);
+            var matchLength31 = rule31Matches.Max(x => x.Length);
+
+            if (matchLength42 != matchLength31)
+            {
+                throw new InvalidOperationException("Matchlength is different!!!");
+            }
+
+            foreach (var message in Messages)
+            {
+                if (MatchesNewRule8And11(message, rule42Matches, rule31Matches, matchLength42))
+                {
+                    result++;
+                }
+            }
+
+            Console.WriteLine($"Number of messages that match rule 0: {result}");
+        }
+
+        /// <summary>
+        /// Should match a combination that starts with a combination of 42 and ends with a combination of 31
+        /// There should be more 42's than 31's
+        /// </summary>
+        private bool MatchesNewRule8And11(string message, List<string> rule42Matches, List<string> rule31Matches, int matchLength)
+        {
+            // If the message is not a multiple of the match length --> it won't match
+            if (message.Length % matchLength != 0)
+            {
+                return false;
+            }
+
+            // The message has to start with rule 42
+            if (!rule42Matches.Any(x => message.StartsWith(x)))
+            {
+                return false;
+            }
+
+            // The message has to end with rule 31
+            if (!rule31Matches.Any(x => message.EndsWith(x)))
+            {
+                return false;
+            }
+
+            // The first part of the substrings inbetween have to match with rule 42
+            var numberOf42 = 1;
+            var numberOf31 = 1;
+            var ruleMatches = false;
+            var startIndex = matchLength;
+            for (var start = startIndex; start < message.Length - matchLength; start += matchLength)
+            {
+                ruleMatches = SubstringMatchesRule(message, start, matchLength, rule42Matches);
+                startIndex = start;
+                if (!ruleMatches)
+                {
+                    break;
+                }
+                numberOf42++;
+            }
+
+            // if the rule matches we're done
+            if (ruleMatches)
+            {
+                return numberOf42 > 1 && numberOf42 > numberOf31;
+            }
+
+            // The last part of the substrings inbetween have to match with rule 31
+            for (var start = startIndex; start < message.Length - matchLength; start += matchLength)
+            {
+                ruleMatches = SubstringMatchesRule(message, start, matchLength, rule31Matches);
+                if (!ruleMatches)
+                {
+                    return false;
+                }
+                numberOf31++;
+            }
+
+            return numberOf42 > 1 && numberOf42 > numberOf31;
+        }
+
+        private bool SubstringMatchesRule(string message, int start, int length, List<string> matches)
+        {
+            var substring = message.Substring(start, length);
+            var result = matches.Any(x => x == substring);
+            return result;
         }
 
         private IList<string> FindRuleMatches(string ruleValue)
         {
-            //Console.WriteLine($" FindRuleMatches for ruleValue {ruleValue}");
-
             var newMatchList = new List<string>();
             var or = ruleValue.Split(" | ");
             foreach (var subRule in or)
@@ -113,27 +197,22 @@ namespace AdventOfCode2020.Solutions
 
         private IList<string> FindMatchesForSubRule(string subRule)
         {
-            //Console.WriteLine($"  FindMatchesForSubRule for subRule {subRule}");
-
             var newMatchList = new List<string>();
             var ruleNumbers = subRule.Split(" ");
             foreach (var ruleNumber in ruleNumbers)
             {
-                //Console.WriteLine($"   Rulenumber {ruleNumber}");
                 // Is the rule already in the rules
                 var ruleNumberNumeric = int.Parse(ruleNumber);
                 var existingRule = Rules.SingleOrDefault(x => x.Number == ruleNumberNumeric);
                 if (existingRule != null)
                 {
                     newMatchList = AppendMatches(newMatchList, existingRule.Matches);
-                    //Console.WriteLine($"   Exists -->  {string.Join(", ", newMatchList)}");
                 }
                 else
                 {
                     // Find it in the tempRules
                     var tempRuleValue = TempRules[int.Parse(ruleNumber)];
                     var foundMatches = FindRuleMatches(tempRuleValue);
-                    //Console.WriteLine($"   Looking in temp rules. Found --> {string.Join(", ", foundMatches)}");
 
                     // Add the rule to the list
                     var newRule = new Rule(ruleNumberNumeric);
@@ -141,7 +220,6 @@ namespace AdventOfCode2020.Solutions
                     Rules.Add(newRule);
 
                     newMatchList = AppendMatches(newMatchList, foundMatches);
-                    //Console.WriteLine($"   NewMatchList --> {string.Join(", ", newMatchList)}");
                 }
             }
 
@@ -191,6 +269,66 @@ namespace AdventOfCode2020.Solutions
 
             var result = new[] { line01, line02, line03, line04, line05, line06, line07, line08, line09, line10,
                                  line11, line12 };
+
+            return result;
+        }
+
+        private string[] GetExample2()
+        {
+            var line01 = "42: 9 14 | 10 1";
+            var line02 = "9: 14 27 | 1 26";
+            var line03 = "10: 23 14 | 28 1";
+            var line04 = "1: \"a\"";
+            var line05 = "11: 42 31";
+            var line06 = "5: 1 14 | 15 1";
+            var line07 = "19: 14 1 | 14 14";
+            var line08 = "12: 24 14 | 19 1";
+            var line09 = "16: 15 1 | 14 14";
+            var line10 = "31: 14 17 | 1 13";
+            var line11 = "6: 14 14 | 1 14";
+            var line12 = "2: 1 24 | 14 4";
+            var line13 = "0: 8 11";
+            var line14 = "13: 14 3 | 1 12";
+            var line15 = "15: 1 | 14";
+            var line16 = "17: 14 2 | 1 7";
+            var line17 = "23: 25 1 | 22 14";
+            var line18 = "28: 16 1";
+            var line19 = "4: 1 1";
+            var line20 = "20: 14 14 | 1 15";
+            var line21 = "3: 5 14 | 16 1";
+            var line22 = "27: 1 6 | 14 18";
+            var line23 = "14: \"b\"";
+            var line24 = "21: 14 1 | 1 14";
+            var line25 = "25: 1 1 | 1 14";
+            var line26 = "22: 14 14";
+            var line27 = "8: 42";
+            var line28 = "26: 14 22 | 1 20";
+            var line29 = "18: 15 15";
+            var line30 = "7: 14 5 | 1 21";
+            var line31 = "24: 14 1";
+            var line32 = "";
+            var line33 = "abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa";
+            var line34 = "bbabbbbaabaabba";
+            var line35 = "babbbbaabbbbbabbbbbbaabaaabaaa";
+            var line36 = "aaabbbbbbaaaabaababaabababbabaaabbababababaaa";
+            var line37 = "bbbbbbbaaaabbbbaaabbabaaa";
+            var line38 = "bbbababbbbaaaaaaaabbababaaababaabab";
+            var line39 = "ababaaaaaabaaab";
+            var line40 = "ababaaaaabbbaba";
+            var line41 = "baabbaaaabbaaaababbaababb";
+            var line42 = "abbbbabbbbaaaababbbbbbaaaababb";
+            var line43 = "aaaaabbaabaaaaababaa";
+            var line44 = "aaaabbaaaabbaaa";
+            var line45 = "aaaabbaabbaaaaaaabbbabbbaaabbaabaaa";
+            var line46 = "babaaabbbaaabaababbaabababaaab";
+            var line47 = "aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba";
+            var line48 = "aababaaaaabaabaabababaaabbabababbbbabbaaabbaaababbbbbbbb";
+
+            var result = new[] { line01, line02, line03, line04, line05, line06, line07, line08, line09, line10,
+                                 line11, line12, line13, line14, line15, line16, line17, line18, line19, line20,
+                                 line21, line22, line23, line24, line25, line26, line27, line28, line29, line30,
+                                 line31, line32, line33, line34, line35, line36, line37, line38, line39, line40,
+                                 line41, line42, line43, line44, line45, line46, line47, line48 };
 
             return result;
         }
