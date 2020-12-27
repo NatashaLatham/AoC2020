@@ -63,6 +63,16 @@ namespace AdventOfCode2020.Solutions
         /// <returns></returns>
         protected string[] ReadFile()
         {
+            var content = ReadFile(dataFile);
+            return content;
+        }
+
+        /// <summary>
+        /// Read all lines in the input file
+        /// </summary>
+        /// <returns></returns>
+        protected string[] ReadFile(string dataFile)
+        {
             var content = File.ReadAllLines(dataFile);
             return content;
         }
