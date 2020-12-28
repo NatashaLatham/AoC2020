@@ -107,7 +107,11 @@ namespace AdventOfCode2020.Solutions
 
         protected override void SolutionPart2()
         {
-            var result = 0;
+            // We now have a list of allergens and their ingredients (from part 1)
+            // Sort them by allergen and put them in a list, separated by commas
+            var sortedAllergens = Allergens.OrderBy(x => x.Key);
+
+            var result = string.Join(",",sortedAllergens.SelectMany(x => x.Value));
             Console.WriteLine($"Result: {result}");
         }
 
